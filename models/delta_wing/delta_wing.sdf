@@ -1,10 +1,11 @@
-<?xml version="1.0" ?>
-<sdf version="1.6">
-  <model name="delta_wing">
-    <pose>0 0 0.02577 0 0 0</pose>
-    <link name="base_link">
+<?xml version="1.0"?>
+<sdf version='1.5'>
+  <model name='delta_wing'>
+    <pose>0 0 0.246 0 0 0</pose>
+    <link name='base_link'>
+      <pose>0 0 0 0 0 0</pose>
       <inertial>
-        <pose>0 -0.12 0 0 0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <mass>1.5</mass>
         <inertia>
           <ixx>0.083137104</ixx>
@@ -15,7 +16,27 @@
           <izz>0.469845106</izz>
         </inertia>
       </inertial>
+      <collision name='base_link_collision'>
+        <pose>0 0 -0.07 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.47 0.47 0.11</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>10</max_vel>
+              <min_depth>0.01</min_depth>
+            </ode>
+          </contact>
+          <!--<friction>
+            <ode/>
+          </friction>-->
+        </surface>
+      </collision>
       <visual name="visual">
+        <pose>0 0 0 0 0 1.571</pose>
         <geometry>
           <mesh>
             <uri>model://delta_wing/meshes/wing.dae</uri>
@@ -25,34 +46,16 @@
             </submesh>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/DarkGrey</name>
+            <uri>__default__</uri>
+          </script>
+        </material>
       </visual>
-      <collision name="body_collision">
-        <geometry>
-          <mesh>
-            <uri>model://delta_wing/meshes/wing.dae</uri>
-            <submesh>
-              <name>Wing</name>
-              <center>true</center>
-            </submesh>
-          </mesh>
-        </geometry>
-      </collision>
-      <collision name="right_rudder_collision">
-        <pose>-0.76435 0.33918 0.002 -0.03 0 0</pose>
-        <geometry>
-          <box>
-            <size>.005 0.12993 .12688</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="left_rudder_collision">
-        <pose>0.76435 0.33918 0.002 -0.03 0 0</pose>
-        <geometry>
-          <box>
-            <size>.005 0.12993 .12688</size>
-          </box>
-        </geometry>
-      </collision>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <link name='delta_wing/imu_link'>
       <pose>0 0 0 0 0 0</pose>
@@ -120,20 +123,39 @@
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
     </joint>
-    <link name="propeller">
-      <pose>0 0.07 0.008 0 1.5707 0</pose>
+    <link name='rotor_puller'>
+      <pose>-0.065 0.0 0.008 0 1.57 0</pose>
       <inertial>
-        <mass>.05</mass>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.005</mass>
         <inertia>
-          <ixx>0.000367571</ixx>
+          <ixx>9.75e-07</ixx>
           <ixy>0</ixy>
-          <iyy>0.00036985</iyy>
           <ixz>0</ixz>
+          <iyy>0.000166704</iyy>
           <iyz>0</iyz>
-          <izz>0.000003187</izz>
+          <izz>0.000167604</izz>
         </inertia>
       </inertial>
+      <collision name='rotor_puller_collision'>
+        <pose>0.0 0 0.0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.005</length>
+            <radius>0.1</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
       <visual name="visual">
+        <pose>0.0 0 0.0 1.57 0 0</pose>
         <geometry>
           <mesh>
             <uri>model://delta_wing/meshes/wing.dae</uri>
@@ -143,40 +165,49 @@
             </submesh>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Blue</name>
+            <uri>__default__</uri>
+          </script>
+        </material>
       </visual>
-      <collision name="blade1">
-        <pose>0 0 0.074205 0 0  0.3</pose>
-        <geometry>
-          <box>
-            <size>0.02561 0.00541 0.14841</size>
-          </box>
-        </geometry>
-      </collision>
-      <collision name="blade2">
-        <pose>0 0 -0.074205 0 0  -0.3</pose>
-        <geometry>
-          <box>
-            <size>0.02561 0.00541 0.14841</size>
-          </box>
-        </geometry>
-      </collision>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
+    <joint name='rotor_puller_joint' type='revolute'>
+      <child>rotor_puller</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
 
     <link name="flap_left">
-      <pose>0.4530 .239 0.007 0 0 0</pose>
+      <pose>-0.24 0.4530 0.007 0 0 1.571</pose>
       <inertial>
         <pose>0 0 0 0 0 0.32445671</pose>
         <mass>.1</mass>
         <inertia>
-          <ixx>0.000102319</ixx>
-          <ixy>0</ixy>
-          <iyy>0.00334417</iyy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
-          <izz>0.003446072</izz>
+          <ixx>0.000001</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.000001</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>0.000001</izz>
         </inertia>
       </inertial>
-      <visual name="visual">
+      <visual name='left_elevon_visual'>
         <geometry>
           <mesh>
             <uri>model://delta_wing/meshes/wing.dae</uri>
@@ -186,32 +217,29 @@
             </submesh>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Blue</name>
+            <uri>__default__</uri>
+          </script>
+        </material>
       </visual>
-      <collision name="collision">
-        <pose>-0.01 0.01 0 0 0 0.32445671</pose>
-        <geometry>
-          <box>
-            <size>0.633463031 0.110694312 0.005</size>
-          </box>
-        </geometry>
-      </collision>
     </link>
-
     <link name="flap_right">
-      <pose>-0.4530 .239 0.007 0 0 0</pose>
+      <pose>-0.24 -0.4530 0.007 0 0 1.571</pose>
       <inertial>
         <pose>0 0 0 0 0 -0.32445671</pose>
         <mass>.1</mass>
         <inertia>
-          <ixx>0.000102319</ixx>
-          <ixy>0</ixy>
-          <iyy>0.00334417</iyy>
-          <ixz>0</ixz>
-          <iyz>0</iyz>
-          <izz>0.003446072</izz>
+          <ixx>0.000001</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.000001</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>0.000001</izz>
         </inertia>
       </inertial>
-      <visual name="visual">
+      <visual name='right_elevon_visual'>
         <geometry>
           <mesh>
             <uri>model://delta_wing/meshes/wing.dae</uri>
@@ -221,33 +249,14 @@
             </submesh>
           </mesh>
         </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Blue</name>
+            <uri>__default__</uri>
+          </script>
+        </material>
       </visual>
-      <collision name="collision">
-        <pose>0.01 0.01 0 0 0 -0.32445671</pose>
-        <geometry>
-          <box>
-            <size>0.633463031 0.110694312 0.005</size>
-          </box>
-        </geometry>
-      </collision>
     </link>
-
-    <joint name="propeller_joint" type="revolute">
-      <parent>base_link</parent>
-      <child>propeller</child>
-      <axis>
-        <xyz>0 -1 0</xyz>
-        <dynamics>
-          <damping>0.002</damping>
-        </dynamics>
-      </axis>
-      <physics>
-        <ode>
-          <implicit_spring_damper>1</implicit_spring_damper>
-        </ode>
-      </physics>
-    </joint>
-
     <joint name="flap_left_joint" type="revolute">
       <parent>base_link</parent>
       <child>flap_left</child>
@@ -259,7 +268,7 @@
           <upper>0.524</upper>
         </limit>
         <dynamics>
-          <damping>0.1</damping>
+          <damping>1.000</damping>
         </dynamics>
       </axis>
       <physics>
@@ -280,7 +289,7 @@
           <upper>0.524</upper>
         </limit>
         <dynamics>
-          <damping>0.1</damping>
+          <damping>1.000</damping>
         </dynamics>
       </axis>
       <physics>
@@ -308,9 +317,9 @@
       <control_joint_name>
         flap_left_joint
       </control_joint_name>
-      <control_joint_rad_to_cl>-1.0</control_joint_rad_to_cl>
+      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
       <robotNamespace></robotNamespace>
-      <windSubTopic>/wind</windSubTopic>
+      <windSubTopic>world_wind</windSubTopic>
     </plugin>
     <plugin name="right_wing" filename="libLiftDragPlugin.so">
       <a0>0.05984281113</a0>
@@ -321,8 +330,8 @@
       <cla_stall>-3.85</cla_stall>
       <cda_stall>-0.9233984055</cda_stall>
       <cma_stall>0</cma_stall>
-      <cp>-0.05 -0.3 0.05</cp>
-      <area>0.50</area>
+      <cp>-0.05 -0.45 0.05</cp>
+      <area>0.6</area>
       <air_density>1.2041</air_density>
       <forward>1 0 0</forward>
       <upward>0 0 1</upward>
@@ -330,15 +339,15 @@
       <control_joint_name>
         flap_right_joint
       </control_joint_name>
-      <control_joint_rad_to_cl>-1.0</control_joint_rad_to_cl>
+      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
       <robotNamespace></robotNamespace>
-      <windSubTopic>/wind</windSubTopic>
+      <windSubTopic>world_wind</windSubTopic>
     </plugin>
-    <plugin name="left_rudder" filename="libLiftDragPlugin.so">
+    <plugin name="rudder" filename="libLiftDragPlugin.so">
       <a0>0.0</a0>
       <cla>4.752798721</cla>
       <cda>0.6417112299</cda>
-      <cma>0.0.</cma>
+      <cma>0.0</cma>
       <alpha_stall>0.3391428111</alpha_stall>
       <cla_stall>-3.85</cla_stall>
       <cda_stall>-0.9233984055</cda_stall>
@@ -349,31 +358,17 @@
       <forward>1 0 0</forward>
       <upward>0 1 0</upward>
       <link_name>base_link</link_name>
+      <!-- <control_joint_name> 
+         rudder_joint 
+      </control_joint_name>  -->
+      <control_joint_rad_to_cl>4.0</control_joint_rad_to_cl>
       <robotNamespace></robotNamespace>
-      <windSubTopic>/wind</windSubTopic>
-    </plugin>
-    <plugin name="right_rudder" filename="libLiftDragPlugin.so">
-      <a0>0.0</a0>
-      <cla>4.752798721</cla>
-      <cda>0.6417112299</cda>
-      <cma>0.0.</cma>
-      <alpha_stall>0.3391428111</alpha_stall>
-      <cla_stall>-3.85</cla_stall>
-      <cda_stall>-0.9233984055</cda_stall>
-      <cma_stall>0</cma_stall>
-      <cp>-0.5 0 0.05</cp>
-      <area>0.02</area>
-      <air_density>1.2041</air_density>
-      <forward>1 0 0</forward>
-      <upward>0 1 0</upward>
-      <link_name>base_link</link_name>
-      <robotNamespace></robotNamespace>
-      <windSubTopic>/wind</windSubTopic>
+      <windSubTopic>world_wind</windSubTopic>
     </plugin>
     <plugin name='puller' filename='libgazebo_motor_model.so'>
       <robotNamespace></robotNamespace>
-      <jointName>propeller_joint</jointName>
-      <linkName>propeller</linkName>
+      <jointName>rotor_puller_joint</jointName>
+      <linkName>rotor_puller</linkName>
       <turningDirection>cw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
@@ -382,13 +377,14 @@
       <momentConstant>0.01</momentConstant>
       <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
       <motorNumber>4</motorNumber>
-      <rotorDragCoefficient>0.000106428</rotorDragCoefficient>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
       <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
       <motorSpeedPubTopic>/motor_speed/4</motorSpeedPubTopic>
-      <rotorVelocitySlowdownSim>20</rotorVelocitySlowdownSim>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <robotNamespace></robotNamespace>
+      <windSubTopic>world_wind</windSubTopic>
     </plugin>
-    -->
-    <include>
+   <include>
       <uri>model://gps</uri>
       <pose>0 0 0 0 0 0</pose>
       <name>gps</name>
@@ -433,19 +429,19 @@
     <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
       <robotNamespace></robotNamespace>
       <imuSubTopic>/imu</imuSubTopic>
-      <gpsSubTopic>/gps</gpsSubTopic>
       <magSubTopic>/mag</magSubTopic>
       <baroSubTopic>/baro</baroSubTopic>
       <mavlink_addr>INADDR_ANY</mavlink_addr>
+      <mavlink_tcp_port>4560</mavlink_tcp_port>
       <mavlink_udp_port>14560</mavlink_udp_port>
-      <serialEnabled>false</serialEnabled>
+      <serialEnabled>0</serialEnabled>
       <serialDevice>/dev/ttyACM0</serialDevice>
       <baudRate>921600</baudRate>
       <qgc_addr>INADDR_ANY</qgc_addr>
       <qgc_udp_port>14550</qgc_udp_port>
       <sdk_addr>INADDR_ANY</sdk_addr>
       <sdk_udp_port>14540</sdk_udp_port>
-      <hil_mode>false</hil_mode>
+      <hil_mode>0</hil_mode>
       <hil_state_level>false</hil_state_level>
       <enable_lockstep>true</enable_lockstep>
       <use_tcp>true</use_tcp>
@@ -458,7 +454,7 @@
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>0</zero_position_armed>
           <joint_control_type>velocity</joint_control_type>
-          <joint_name>propeller_joint</joint_name>
+          <joint_name>rotor_puller_joint</joint_name>
         </channel>
         <channel name="left_elevon">
           <input_index>5</input_index>
