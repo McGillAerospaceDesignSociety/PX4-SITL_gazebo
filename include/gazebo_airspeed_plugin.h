@@ -57,6 +57,8 @@
 #include <gazebo/transport/transport.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/physics/physics.hh>
+#include <gazebo/sensors/SensorTypes.hh>
+#include <gazebo/sensors/Sensor.hh>
 #include <ignition/math.hh>
 
 #include <Airspeed.pb.h>
@@ -67,19 +69,20 @@ namespace gazebo
 
 typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
 
-class GAZEBO_VISIBLE AirspeedPlugin : public ModelPlugin
+class GAZEBO_VISIBLE AirspeedPlugin : public SensorPlugin
 {
 public:
   AirspeedPlugin();
   virtual ~AirspeedPlugin();
 
 protected:
-  virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
+  virtual void Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf);
   virtual void OnUpdate(const common::UpdateInfo&);
 
 private:
   void WindVelocityCallback(WindPtr& msg);
 
+  sensors::SensorPtr parentSensor_;
   physics::ModelPtr model_;
   physics::WorldPtr world_;
   physics::LinkPtr link_;
@@ -92,6 +95,7 @@ private:
   common::Time last_time_;
   std::string namespace_;
   std::string link_name_;
+  std::string model_name_;
 
   ignition::math::Vector3d wind_vel_;
 

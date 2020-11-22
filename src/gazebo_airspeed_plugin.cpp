@@ -40,10 +40,13 @@
 
 #include <gazebo_airspeed_plugin.h>
 
-namespace gazebo {
-GZ_REGISTER_MODEL_PLUGIN(AirspeedPlugin)
+#include <boost/algorithm/string.hpp>
 
-AirspeedPlugin::AirspeedPlugin() : ModelPlugin(),
+using namespace std;
+namespace gazebo {
+GZ_REGISTER_SENSOR_PLUGIN(AirspeedPlugin)
+
+AirspeedPlugin::AirspeedPlugin() : SensorPlugin(),
   diff_pressure_stddev_(0.01f),
   temperature_(20.0f)
 { }
@@ -52,12 +55,32 @@ AirspeedPlugin::~AirspeedPlugin()
 {
     if (updateConnection_)
       updateConnection_->~Connection();
+    parentSensor_.reset();
 }
 
-void AirspeedPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
+void AirspeedPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 {
-  // Store the pointer to the model.
-  model_ = _model;
+  // Get then name of the parent sensor
+  parentSensor_ = std::dynamic_pointer_cast<sensors::Sensor>(_parent);
+
+  if (!parentSensor_)
+    gzthrow("AirspeedPlugin requires a Airspeed Sensor as its parent");
+
+  // Get the root model name
+  const std::string scopedName = _parent->ParentName();
+  vector<std::string> names_splitted;
+  boost::split(names_splitted, scopedName, boost::is_any_of("::"));
+  names_splitted.erase(std::remove_if(begin(names_splitted), end(names_splitted),
+                            [](const string& name)
+                            { return name.size() == 0; }), end(names_splitted));
+  const string rootModelName = names_splitted.front(); // The first element is the name of the root model
+
+  // the second to the last name is the model name
+  const string parentSensorModelName = names_splitted.rbegin()[1];
+
+  // store the model name
+  model_name_ = names_splitted[0];
+
   world_ = model_->GetWorld();
 
   if (_sdf->HasElement("robotNamespace")) {
