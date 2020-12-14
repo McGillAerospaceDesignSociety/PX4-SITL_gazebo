@@ -59,12 +59,14 @@
 #include <gazebo/physics/physics.hh>
 #include <ignition/math.hh>
 
+#include "CommandMotorSpeed.pb.h"
 #include <Wind.pb.h>
 
 namespace gazebo
 {
 
 typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
+typedef const boost::shared_ptr<const mav_msgs::msgs::CommandMotorSpeed> CommandMotorSpeedPtr;
 
 class GAZEBO_VISIBLE AerodynamicsPlugin : public ModelPlugin
 {
@@ -77,9 +79,10 @@ protected:
   virtual void OnUpdate(const common::UpdateInfo&);
 
 private:
-  double getLiftCoefficient();
-  double getDragCoefficient();
-  double getSideSlipCoefficient();
+  double getLiftCoefficient(double alpha);
+  double getDragCoefficient(double alpha);
+  double getSideSlipCoefficient(double beta);
+  void ActuatorCallback(CommandMotorSpeedPtr &rot_velocities);
   void WindVelocityCallback(WindPtr& msg);
 
   physics::ModelPtr model_;
@@ -87,6 +90,7 @@ private:
   physics::LinkPtr link_;
 
   transport::NodePtr node_handle_;
+  transport::SubscriberPtr actuator_sub_;
   transport::SubscriberPtr wind_sub_;
   event::ConnectionPtr updateConnection_;
 
